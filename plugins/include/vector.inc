@@ -153,6 +153,37 @@ stock void ScaleVector(float vec[3], float scale)
 }
 
 /**
+ * Offsets an array vectors.
+ *
+ * @param from          Input Vector Array.
+ * @param to            Output Vector Array.
+ * @param vecs_size     Size of the Vector Array.
+ * @param offset        Offset Vector.
+ */
+native void OffsetVectorArray(const float[][3] from, float[][3] to, int vecs_size, const float offset[3]);
+
+/**
+ * Scales an array vectors.
+ *
+ * @param from          Input Vector Array.
+ * @param to            Output Vector Array.
+ * @param vecs_size     Size of the Vector Array.
+ * @param scale         Scale value.
+ */
+native void ScaleVectorArray(const float[][3] from, float[][3] to, int vecs_size, float scale);
+
+/**
+ * Transforms an array vectors.
+ *
+ * @param from          Input Vector Array.
+ * @param to            Output Vector Array.
+ * @param vecs_size     Size of the Vector Array.
+ * @param scale         Scale value.
+ * @param offset        Offset Vector.
+ */
+native void TransformVectorArray(const float[][3] from, float[][3] to, int vecs_size, float scale, const float offset[3]);
+
+/**
  * Negatives a vector.
  *
  * @param vec           Vector.

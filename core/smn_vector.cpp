@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -40,7 +40,7 @@
 #define SET_VECTOR(addr, vec) \
 	addr[0] = sp_ftoc(vec.x); \
 	addr[1] = sp_ftoc(vec.y); \
-	addr[2] = sp_ftoc(vec.z); 
+	addr[2] = sp_ftoc(vec.z);
 
 static cell_t GetVectorLength(IPluginContext *pContext, const cell_t *params)
 {
@@ -49,7 +49,7 @@ static cell_t GetVectorLength(IPluginContext *pContext, const cell_t *params)
 	pContext->LocalToPhysAddr(params[1], &addr);
 
 	Vector source(sp_ctof(addr[0]), sp_ctof(addr[1]), sp_ctof(addr[2]));
-	
+
 	if (!params[2])
 	{
 		return sp_ftoc(source.Length());
@@ -185,6 +185,73 @@ static cell_t NormalizeVector(IPluginContext *pContext, const cell_t *params)
 	return sp_ftoc(length);
 }
 
+static cell_t OffsetVectorArray(IPluginContext *pContext, const cell_t *params)
+{
+	cell_t *from, *to, *off;
+	cell_t  size  = params[3];
+
+	pContext->LocalToPhysAddr(params[1], &from);
+	pContext->LocalToPhysAddr(params[2], &to);
+	pContext->LocalToPhysAddr(params[4], &off);
+
+	Vector voff(sp_ctof(off[0]), sp_ctof(off[1]), sp_ctof(off[2]));
+
+	for (cell_t i = 0; i < size; ++i)
+	{
+		const cell_t offset = i * 3;
+		Vector source(sp_ctof(from[offset + 0]), sp_ctof(from[offset + 1]), sp_ctof(from[offset + 2]));
+		source += voff;
+		to[offset + 0] = sp_ftoc(source.x);
+		to[offset + 1] = sp_ftoc(source.y);
+		to[offset + 2] = sp_ftoc(source.z);
+	}
+
+	return 1;
+}
+
+static cell_t ScaleVectorArray(IPluginContext *pContext, const cell_t *params)
+{
+	cell_t *from, *to;
+	cell_t  size  = params[3] * 3;
+	float   scale = sp_ctof(params[4]);
+
+	pContext->LocalToPhysAddr(params[1], &from);
+	pContext->LocalToPhysAddr(params[2], &to);
+
+	for (cell_t i = 0; i < size; ++i)
+	{
+		to[i] = sp_ftoc(sp_ctof(from[i]) * scale);
+	}
+
+	return 1;
+}
+
+static cell_t TransformVectorArray(IPluginContext *pContext, const cell_t *params)
+{
+	cell_t *from, *to, *off;
+	cell_t  size  = params[3];
+	float   scale = sp_ctof(params[4]);
+
+	pContext->LocalToPhysAddr(params[1], &from);
+	pContext->LocalToPhysAddr(params[2], &to);
+	pContext->LocalToPhysAddr(params[5], &off);
+
+	Vector voff(sp_ctof(off[0]), sp_ctof(off[1]), sp_ctof(off[2]));
+
+	for (cell_t i = 0; i < size; ++i)
+	{
+		const cell_t offset = i * 3;
+		Vector source(sp_ctof(from[offset + 0]), sp_ctof(from[offset + 1]), sp_ctof(from[offset + 2]));
+		source *= scale;
+		source += voff;
+		to[offset + 0] = sp_ftoc(source.x);
+		to[offset + 1] = sp_ftoc(source.y);
+		to[offset + 2] = sp_ftoc(source.z);
+	}
+
+	return 1;
+}
+
 REGISTER_NATIVES(vectorNatives)
 {
 	{"GetAngleVectors",			GetAngleVectors},
@@ -195,5 +262,8 @@ REGISTER_NATIVES(vectorNatives)
 	{"GetVectorLength",			GetVectorLength},
 	{"GetVectorVectors",		GetVectorVectors},
 	{"NormalizeVector",			NormalizeVector},
+	{"OffsetVectorArray",		OffsetVectorArray},
+	{"ScaleVectorArray",		ScaleVectorArray},
+	{"TransformVectorArray",	TransformVectorArray},
 	{NULL,					NULL}
 };
